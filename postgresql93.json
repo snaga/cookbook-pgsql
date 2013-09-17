@@ -3,7 +3,8 @@
     "listen_address" : "*",
     "port" : "5432",
     "shared_buffers" : "512MB",
-    "from_address" : "0.0.0.0/0"
+    "from_address" : "0.0.0.0/0",
+    "password" : "passw0rd"
   },
 
   "run_list":[

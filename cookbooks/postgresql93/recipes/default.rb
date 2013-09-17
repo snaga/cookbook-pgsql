@@ -6,6 +6,20 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+template "iptables" do
+  path "/etc/sysconfig/iptables"
+  source "iptables.erb"
+  owner "root"
+  group "root"
+  mode 0600
+  notifies :restart, 'service[iptables]'
+end
+
+service "iptables" do
+  supports :status => true , :restart => true , :reload => false
+  action [ :enable, :start ]
+end
+
 cookbook_file "/tmp/pgdg-redhat93-9.3-1.noarch.rpm" do
   mode 00644
   checksum "52697bf42907b503faeaea199959bc711a493f4ed67d5f4c9ecf8a9066611c49"
@@ -54,6 +68,14 @@ template "pg_hba.conf" do
   group "postgres"
   mode 0600
   notifies :reload, 'service[postgresql-9.3]'
+end
+
+bash "postgresql93-password" do
+  only_if { File.exists?("/var/lib/pgsql/9.3/data/PG_VERSION") }
+  password = node['postgresql93']['password']
+  code <<-EOC
+    sudo -u postgres /usr/pgsql-9.3/bin/psql -U postgres -c "alter user postgres with unencrypted password '#{password}'" postgres
+  EOC
 end
 
 service "postgresql-9.3" do

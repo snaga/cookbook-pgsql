@@ -1,0 +1,12 @@
+{
+  "postgresql93": {
+    "listen_address" : "*",
+    "port" : "5433",
+    "shared_buffers" : "1024MB"
+  },
+
+  "run_list":[
+    "postgresql93"
+  ]
+}
+

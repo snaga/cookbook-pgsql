@@ -22,12 +22,42 @@ end
   end
 end
 
+bash "postgresql93-initdb" do
+  not_if { File.exists?("/var/lib/pgsql/9.3/data/PG_VERSION") }
+  code <<-EOC
+    sudo -u postgres /usr/pgsql-9.3/bin/initdb -D /var/lib/pgsql/9.3/data --no-locale -E UTF-8 -k
+  EOC
+end
+
+template "postgresql-9.3" do
+  path "/etc/sysconfig/pgsql/postgresql-9.3"
+  source "postgresql-9.3.erb"
+  owner "root"
+  group "root"
+  mode 0644
+  notifies :restart, 'service[postgresql-9.3]'
+end
+
 template "postgresql.conf" do
   path "/var/lib/pgsql/9.3/data/postgresql.conf"
   source "postgresql.conf.erb"
   owner "postgres"
   group "postgres"
   mode 0600
-#  notifies :reload, 'service[postgresql-9.3]'
+  notifies :restart, 'service[postgresql-9.3]'
+end
+
+template "pg_hba.conf" do
+  path "/var/lib/pgsql/9.3/data/pg_hba.conf"
+  source "pg_hba.conf.erb"
+  owner "postgres"
+  group "postgres"
+  mode 0600
+  notifies :reload, 'service[postgresql-9.3]'
+end
+
+service "postgresql-9.3" do
+  supports :status => true , :restart => true , :reload => true
+  action [ :enable, :start ]
 end
 
